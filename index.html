@@ -2,29 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Offline Clicker — Installable PWA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline Clicker — Enhanced</title>
 
-  <!-- PWA / iOS meta -->
-  <link rel="manifest" href="manifest.json">
+  <!-- PWA / iOS meta (simplified for single file) -->
   <meta name="theme-color" content="#0b1220">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Offline Clicker">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <!-- simple inline apple icon (SVG data URI) -->
-  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,
-    %3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E
-      %3Crect width='100%25' height='100%25' rx='64' fill='%230b1220'/%3E
-      %3Ctext x='50%25' y='54%25' font-size='240' fill='%23ffd85a' font-family='Arial' text-anchor='middle' alignment-baseline='middle'%3E%F0%9F%8E%89%3C/text%3E
-    %3C/svg%3E" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Crect width='100%25' height='100%25' rx='64' fill='%230b1220'/%3E%3Ctext x='50%25' y='54%25' font-size='240' fill='%23ffd85a' font-family='Arial' text-anchor='middle' alignment-baseline='middle'%3E%F0%9F%8E%89%3C/text%3E%3C/svg%3E" />
 
-  <link rel="stylesheet" href="style.css">
+  <!-- Consolidated CSS Styles -->
+  <style>
+    :root{
+      --bg:#07101a;
+      --panel:#0b1220;
+      --accent:#ffd85a;
+      --muted:#9aa8b3;
+      --glass: rgba(255,255,255,0.03);
+      --success: #0f7a5f;
+      --info: #3b82f6;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,var(--bg) 0%, #081426 60%);
+      color:#e6f0f6;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;align-items:center;justify-content:center;padding:20px;
+    }
+
+    main#app{
+      width:100%;max-width:960px;background:var(--panel);border-radius:14px;
+      box-shadow:0 10px 40px rgba(2,6,23,0.6);padding:20px;overflow:hidden;
+      display:grid;grid-template-columns:1fr 360px;gap:20px;
+    }
+
+    header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    header h1{margin:0;font-size:20px;letter-spacing:0.5px}
+    .meta{display:flex;gap:15px;align-items:center}
+    .prestige-display{font-size:14px;font-weight:600;color:var(--info);padding:4px 8px;border-radius:4px;background:rgba(59, 130, 246, 0.1)}
+    
+    button{cursor:pointer;border:0;border-radius:8px;padding:8px 12px;background:var(--glass);color:var(--accent);transition:background 150ms}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    button.danger{background:#8b2e2e;color:#fff}
+    button:disabled{opacity:0.5;cursor:not-allowed}
+    
+    /* Import button fix for label wrapper */
+    .import-label{cursor:pointer;border:0;border-radius:8px;padding:8px 12px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted);transition:background 150ms;display:inline-block;}
+    .import-label:hover{background:rgba(255,255,255,0.06);}
+
+    .toggle{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+    .toggle input{width:18px;height:18px}
+
+    .game{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;min-height:360px}
+    #scorePanel{text-align:center}
+    .score{font-size:36px;font-weight:700}
+    .perSec{font-size:14px;color:var(--muted);margin-top:4px}
+
+    .big-click{
+      width:220px;height:220px;border-radius:50%;font-size:84px;display:flex;align-items:center;justify-content:center;
+      background: radial-gradient(circle at 30% 30%, #ffd85a33, #ffd85a14), linear-gradient(180deg,#ffd85a 0%, #ffb84d 60%);
+      color:#07101a;box-shadow:0 10px 30px rgba(0,0,0,0.4), inset 0 -6px 20px rgba(0,0,0,0.12);
+      transform:translateY(0);transition:transform 120ms ease;
+      user-select:none;
+    }
+    .big-click:active{transform:translateY(3px) scale(0.995)}
+
+    .floating-layer{position:absolute;pointer-events:none;width:100%;height:100%;top:0;left:0}
+
+    .shop{padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:12px;min-height:360px}
+    .shop h2{margin:0 0 8px 0}
+    .upgrades{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding-right:6px}
+    
+    /* Scrollbar style */
+    .upgrades::-webkit-scrollbar { width: 6px; }
+    .upgrades::-webkit-scrollbar-thumb { background: var(--glass); border-radius: 3px; }
+    .upgrades::-webkit-scrollbar-track { background: transparent; }
+
+
+    .upgrade{display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(255,255,255,0.02);border-radius:8px}
+    .u-title{font-weight:600}
+    .u-desc{font-size:12px;color:var(--muted);margin-top:4px}
+    .u-cost{font-weight:700;color:var(--accent)}
+    .u-buy{padding:6px 10px;border-radius:8px;background:var(--success);color:white}
+
+    .controls{display:flex;flex-wrap: wrap; gap:8px;margin-top:12px}
+    .controls .danger, .controls .ghost {flex-grow: 1; min-width: 140px;}
+
+    footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
+
+    /* floating + scoring animation */
+    .floater{
+      position:absolute;left:50%;transform:translateX(-50%) translateY(0);
+      color:var(--accent);font-weight:700;text-shadow:0 3px 10px rgba(0,0,0,0.6);
+      animation:floatUp 900ms ease-out forwards;
+      pointer-events:none;
+    }
+    @keyframes floatUp{
+      0%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+      100%{opacity:0;transform:translateX(-50%) translateY(-120px) scale(1.1)}
+    }
+
+    /* responsive */
+    @media (max-width:920px){
+      main#app{grid-template-columns:1fr;max-width:640px}
+      .big-click{width:180px;height:180px;font-size:64px}
+    }
+    @media (max-width:480px) {
+        .meta { gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+        .prestige-display { order: -1; margin-right: auto; }
+    }
+  </style>
 </head>
 <body>
   <main id="app">
     <header>
       <h1>Offline Clicker</h1>
       <div class="meta">
+        <div id="prestigeCount" class="prestige-display">Prestige: 0</div>
         <button id="installBtn" class="ghost">Install</button>
         <label class="toggle">
           <input id="soundToggle" type="checkbox" checked>
@@ -50,13 +150,18 @@
         <!-- upgrades populated by script -->
       </div>
       <div class="controls">
-        <button id="prestigeBtn" class="danger">Prestige × Reset</button>
+        <button id="exportBtn" class="ghost">Export JSON</button>
+        <label for="importFile" class="import-label">
+            Import JSON
+            <input type="file" id="importFile" accept="application/json" style="display:none;">
+        </label>
+        <button id="prestigeBtn" class="danger">Prestige ($ +1)</button>
         <button id="resetBtn" class="ghost">Hard Reset</button>
       </div>
     </section>
 
     <footer>
-      <small>Auto-save every 5s • Works offline • Installable</small>
+      <small>Auto-save every 5s • Works offline • Export/Import Progress</small>
     </footer>
   </main>
 
@@ -73,6 +178,404 @@
     </div>
   </template>
 
-  <script src="script.js" defer></script>
+  <!-- Consolidated JavaScript Script -->
+  <script>
+    /* Offline Clicker — In-page script
+       Features:
+       - Persistent save/load to localStorage
+       - Auto-save every 5s
+       - Enhanced Upgrades
+       - JSON Export/Import functionality
+    */
+
+    (() => {
+      // ---- State & defaults ----
+      const STORAGE_KEY = 'offline-clicker-v2';
+      const AUTOSAVE_MS = 5000;
+
+      const getInitialState = () => ({
+        score: 0,
+        clickPower: 1,
+        multiplier: 1, // Bonus to click and auto value
+        perSecond: 0,
+        upgrades: {
+          clickPower: { level: 0, baseCost: 10 },
+          multiplier: { level: 0, baseCost: 50 },
+          autoclicker: { level: 0, baseCost: 100 },
+          superClick: { level: 0, baseCost: 10000, powerBonus: 10 },
+          efficiency: { level: 0, baseCost: 500 },
+        },
+        prestige: 0,
+        settings: { sound: true }
+      });
+
+      let state = load() || getInitialState();
+
+      // Ensure state is updated with new properties from default state if loading an old save
+      function mergeState(loadedState, defaultState) {
+        // Simple deep merge for known properties
+        const newState = { ...defaultState, ...loadedState };
+        newState.upgrades = { ...defaultState.upgrades };
+        for (const key in loadedState.upgrades) {
+            newState.upgrades[key] = { ...defaultState.upgrades[key], ...loadedState.upgrades[key] };
+        }
+        return newState;
+      }
+      state = mergeState(state, getInitialState());
+
+      // Apply prestige bonus on load
+      state.clickPower = Math.max(state.clickPower, 1 + state.prestige);
+      state.upgrades.superClick.level > 0 && (state.clickPower += (state.upgrades.superClick.level * state.upgrades.superClick.powerBonus));
+
+
+      // ---- Elements ----
+      const scoreEl = document.getElementById('score');
+      const perSecEl = document.getElementById('perSec');
+      const bigClick = document.getElementById('bigClick');
+      const floatingLayer = document.getElementById('floatingLayer');
+      const upgradesList = document.getElementById('upgradesList');
+      const upgradeTpl = document.getElementById('upgradeTpl');
+      const installBtn = document.getElementById('installBtn');
+      const soundToggle = document.getElementById('soundToggle');
+      const prestigeBtn = document.getElementById('prestigeBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const prestigeCountEl = document.getElementById('prestigeCount');
+      const exportBtn = document.getElementById('exportBtn');
+      const importFile = document.getElementById('importFile');
+
+      // Install prompt handling
+      let deferredPrompt = null;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'inline-block';
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) {
+          // iOS: show a short help popup (can't trigger programmatically)
+          alert('On iOS: tap the Share button in Safari, then "Add to Home Screen".');
+          return;
+        }
+        deferredPrompt.prompt();
+        const choice = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        installBtn.style.display = 'none';
+      });
+      
+      // Hide install button if already installed
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+          installBtn.style.display = 'none';
+      }
+
+
+      // sound
+      soundToggle.checked = state.settings.sound;
+      soundToggle.addEventListener('change', () => {
+        state.settings.sound = soundToggle.checked;
+        save();
+      });
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playClickSound() {
+        if (!state.settings.sound) return;
+        try {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'sine';
+          o.frequency.value = 520 + Math.random()*80;
+          g.gain.value = 0.08;
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start();
+          o.stop(audioCtx.currentTime + 0.06);
+        } catch (e) { /* mobile autoplay restrictions may block until interaction */ }
+      }
+
+      // ---- UI helpers ----
+      function formatNumber(num) {
+          if (num < 1000) return Math.floor(num).toString();
+          if (num < 1000000) return (num / 1000).toFixed(1) + 'K';
+          if (num < 1000000000) return (num / 1000000).toFixed(2) + 'M';
+          if (num < 1000000000000) return (num / 1000000000).toFixed(3) + 'B';
+          return num.toExponential(2);
+      }
+
+      function updateUI() {
+        scoreEl.textContent = formatNumber(state.score);
+        const perSec = computePerSecond();
+        state.perSecond = perSec;
+        perSecEl.textContent = `${formatNumber(perSec)} / sec`;
+        prestigeCountEl.textContent = `Prestige: ${state.prestige}`;
+        renderUpgrades();
+      }
+
+      function showFloating(text, xPercent = 50) {
+        const el = document.createElement('div');
+        el.className = 'floater';
+        el.style.left = xPercent + '%';
+        el.textContent = text;
+        floatingLayer.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+      }
+
+      // ---- Game mechanics ----
+      function computePerSecond() {
+        const autoLevel = state.upgrades.autoclicker.level;
+        if (autoLevel === 0) return 0;
+
+        // New: Efficiency multiplier (Reduces interval by 5% per level, max 95% reduction)
+        const efficiencyMultiplier = Math.pow(0.95, state.upgrades.efficiency.level); 
+        const baseInterval = 1000;
+        const effectiveInterval = Math.max(100, baseInterval * efficiencyMultiplier); // Cap at 100ms interval
+        
+        // Rate is how many "autoclicks" per second: 1000ms / effectiveInterval
+        const ratePerSec = 1000 / effectiveInterval;
+        
+        // Base gain per tick: clickPower * multiplier bonus
+        const clickPower = state.clickPower;
+        const multiplierBonus = (1 + state.upgrades.multiplier.level * 0.1); 
+
+        const gainPerClick = clickPower * multiplierBonus;
+
+        // Total per second = clicks per second * gain per click * number of autoclickers
+        return ratePerSec * gainPerClick * autoLevel;
+      }
+
+      function clickAction(xPercent) {
+        // Base click power includes prestige and superClick bonuses
+        const basePower = state.clickPower; 
+        const multiplierBonus = (1 + state.upgrades.multiplier.level * 0.1); 
+        
+        const gain = basePower * multiplierBonus;
+
+        state.score += gain;
+        playClickSound();
+        showFloating('+' + formatNumber(gain), xPercent);
+        updateUI();
+      }
+
+      bigClick.addEventListener('click', (ev) => {
+        const rect = bigClick.getBoundingClientRect();
+        const x = ((ev.clientX - rect.left) / rect.width) * 100;
+        clickAction(x);
+      });
+
+      // Autoclicker loop (Smoother 100ms tick)
+      setInterval(() => {
+        if (state.perSecond > 0) {
+            // Apply 1/10th of the full second's income every 100ms
+            state.score += (state.perSecond / 10);
+            updateUI();
+        }
+      }, 100);
+
+      // ---- Upgrades ----
+      const upgradeDefs = [
+        {
+          key: 'clickPower',
+          title: 'Manual Click Power',
+          desc: 'Increase how much each manual click gives (+$1).',
+          cost: (lvl, base) => Math.round(base * Math.pow(1.6, lvl)),
+          effect: (state, lvl) => { state.clickPower = (1 + state.prestige) + lvl + (state.upgrades.superClick.level * state.upgrades.superClick.powerBonus); }
+        },
+        {
+          key: 'multiplier',
+          title: 'Global Multiplier',
+          desc: 'Bonus multiplier to all income (10% per level).',
+          cost: (lvl, base) => Math.round(base * Math.pow(2.0, lvl)),
+          effect: () => {} // Effect is applied in clickAction/computePerSecond
+        },
+        {
+          key: 'autoclicker',
+          title: 'Autoclicker Drone',
+          desc: 'Automatically gain income over time (1 unit/sec base).',
+          cost: (lvl, base) => Math.round(base * Math.pow(1.9, lvl)),
+          effect: () => {} // Effect is applied in computePerSecond
+        },
+        {
+          key: 'superClick',
+          title: 'Super Click Core',
+          desc: 'Massively increases base click power (+$10). Expensive!',
+          cost: (lvl, base) => Math.round(base * Math.pow(5.0, lvl)),
+          effect: (state, lvl) => { 
+            state.clickPower = (1 + state.prestige) + state.upgrades.clickPower.level + (lvl * state.upgrades.superClick.powerBonus);
+          }
+        },
+        {
+          key: 'efficiency',
+          title: 'Auto Efficiency',
+          desc: 'Makes Autoclickers work 5% faster per level.',
+          cost: (lvl, base) => Math.round(base * Math.pow(1.8, lvl)),
+          effect: () => {} // Effect is applied in computePerSecond
+        }
+      ];
+
+      function applyEffects() {
+        // Recalculate all base stats based on current levels
+        const cpLevel = state.upgrades.clickPower.level;
+        const scLevel = state.upgrades.superClick.level;
+        
+        // Reset and apply base + prestige + upgrades
+        state.clickPower = (1 + state.prestige);
+        
+        // Click Power upgrade bonus
+        state.clickPower += cpLevel;
+        
+        // Super Click bonus
+        state.clickPower += (scLevel * state.upgrades.superClick.powerBonus);
+      }
+
+      function renderUpgrades() {
+        upgradesList.innerHTML = '';
+        upgradeDefs.forEach(def => {
+          const inst = upgradeTpl.content.cloneNode(true);
+          const dom = inst.querySelector('.upgrade');
+          dom.querySelector('.u-title').textContent = def.title;
+          dom.querySelector('.u-desc').textContent = def.desc;
+          const level = state.upgrades[def.key].level;
+          const base = state.upgrades[def.key].baseCost;
+          const cost = def.cost(level, base);
+          dom.querySelector('.u-cost').textContent = `${formatNumber(cost)}`;
+          const buyBtn = dom.querySelector('.u-buy');
+          buyBtn.textContent = `Buy (${level})`;
+          buyBtn.disabled = state.score < cost;
+          buyBtn.addEventListener('click', () => {
+            if (state.score >= cost) {
+              state.score -= cost;
+              state.upgrades[def.key].level++;
+              
+              applyEffects(); // Re-apply all effects after a purchase
+              updateUI();
+              save();
+              playClickSound();
+              showFloating('-' + formatNumber(cost), 76); // show cost spent
+            } else {
+              // not enough
+              showFloating('Need more!', 80);
+            }
+          });
+          upgradesList.appendChild(dom);
+        });
+      }
+
+      // Prestige: reset for prestige points
+      prestigeBtn.addEventListener('click', () => {
+        if (!confirm(`Prestige will reset progress (score, upgrades) but grant a permanent +1 to base click power. Current Prestige: ${state.prestige}. Proceed?`)) return;
+        
+        state.prestige++;
+        const initialState = getInitialState();
+        
+        // Keep settings, only reset game state
+        state = {
+            ...initialState,
+            prestige: state.prestige,
+            settings: state.settings
+        };
+        
+        // Apply new prestige bonus
+        applyEffects();
+        
+        save();
+        updateUI();
+      });
+
+      // Hard Reset
+      resetBtn.addEventListener('click', () => {
+        if (!confirm('Completely reset EVERYTHING, including Prestige and settings?')) return;
+        state = getInitialState();
+        localStorage.removeItem(STORAGE_KEY);
+        updateUI();
+      });
+
+      // ---- JSON Export/Import ----
+
+      exportBtn.addEventListener('click', exportGame);
+
+      function exportGame() {
+        const data = JSON.stringify(state, null, 2);
+        const filename = `offline-clicker-save-${new Date().toISOString().slice(0, 10)}.json`;
+        
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        showFloating('Exported!', 50);
+      }
+
+      importFile.addEventListener('change', importGame);
+
+      function importGame(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const rawData = e.target.result;
+            const importedState = JSON.parse(rawData);
+            
+            // Basic validation to ensure it's a game save
+            if (typeof importedState.score === 'number' && importedState.upgrades) {
+                // Merge to ensure new properties exist, even on old save files
+                state = mergeState(importedState, getInitialState());
+                
+                // Re-apply effects to refresh calculated stats
+                applyEffects(); 
+                save();
+                updateUI();
+                showFloating('Progress Loaded!', 50);
+            } else {
+                showFloating('Invalid Save File', 50);
+            }
+          } catch (e) {
+            console.error('Failed to process imported file:', e);
+            showFloating('Error Importing File', 50);
+          }
+          // Clear file input to allow re-importing the same file
+          event.target.value = ''; 
+        };
+        reader.readAsText(file);
+      }
+      
+      // ---- Save / Load ----
+      function save() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (e) {
+          console.warn('Save failed', e);
+        }
+      }
+      function load() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch (e) {
+          console.warn('Load failed', e); return null;
+        }
+      }
+
+      // Auto-save
+      setInterval(save, AUTOSAVE_MS);
+      window.addEventListener('beforeunload', save);
+
+      // Init
+      applyEffects(); // Ensure prestige/superclick is applied correctly on startup
+      updateUI();
+      
+      // resume audio context on first user gesture (fix mobile autoplay)
+      document.addEventListener('click', () => {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      }, { once: true });
+
+    })();
+  </script>
 </body>
 </html>
+
