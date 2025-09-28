@@ -1,11 +1,11 @@
-const CACHE_NAME = "offline-cache-v2";
+const CACHE_NAME = "offline-cache-v3";
 const FILES_TO_CACHE = [
-  "index.html",
-  "style.css",
-  "script.js"
+  "./index.html",
+  "./style.css",
+  "./script.js"
 ];
 
-// Install SW and cache files
+// Install and cache files
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
@@ -23,11 +23,11 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// Fetch from cache first, fall back to network
+// Cache-first strategy
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response =>
-      response || fetch(event.request)
-    )
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
+    })
   );
 });
