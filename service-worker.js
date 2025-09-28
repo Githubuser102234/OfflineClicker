@@ -1,11 +1,12 @@
-const CACHE_NAME = "offline-cache-v3";
+const CACHE_NAME = "offline-cache-v4";
 const FILES_TO_CACHE = [
+  "./",             // handles index.html
   "./index.html",
   "./style.css",
   "./script.js"
 ];
 
-// Install and cache files
+// Install event: pre-cache core files
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
@@ -13,7 +14,7 @@ self.addEventListener("install", event => {
   self.skipWaiting();
 });
 
-// Activate new SW
+// Activate event: clean old caches
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -23,11 +24,16 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// Cache-first strategy
+// Fetch event: try network, then cache
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then(response => {
+        // Cache new requests dynamically
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        return response;
+      })
+      .catch(() => caches.match(event.request)) // fallback to cache
   );
 });
