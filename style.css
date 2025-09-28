@@ -1,9 +1,82 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin-top: 50px;
+:root{
+  --bg:#07101a;
+  --panel:#0b1220;
+  --accent:#ffd85a;
+  --muted:#9aa8b3;
+  --glass: rgba(255,255,255,0.03);
 }
-button {
-  padding: 10px 20px;
-  font-size: 16px;
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,var(--bg) 0%, #081426 60%);
+  color:#e6f0f6;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+
+main#app{
+  width:100%;max-width:960px;background:var(--panel);border-radius:14px;
+  box-shadow:0 10px 40px rgba(2,6,23,0.6);padding:20px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 360px;gap:20px;
+}
+
+header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+header h1{margin:0;font-size:20px;letter-spacing:0.5px}
+.meta{display:flex;gap:10px;align-items:center}
+button{cursor:pointer;border:0;border-radius:8px;padding:8px 12px;background:var(--glass);color:var(--accent)}
+button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+button.danger{background:#8b2e2e;color:#fff}
+
+.toggle{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+.toggle input{width:18px;height:18px}
+
+.game{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;min-height:360px}
+#scorePanel{text-align:center}
+.score{font-size:36px;font-weight:700}
+.perSec{font-size:14px;color:var(--muted);margin-top:4px}
+
+.big-click{
+  width:220px;height:220px;border-radius:50%;font-size:84px;display:flex;align-items:center;justify-content:center;
+  background: radial-gradient(circle at 30% 30%, #ffd85a33, #ffd85a14), linear-gradient(180deg,#ffd85a 0%, #ffb84d 60%);
+  color:#07101a;box-shadow:0 10px 30px rgba(0,0,0,0.4), inset 0 -6px 20px rgba(0,0,0,0.12);
+  transform:translateY(0);transition:transform 120ms ease;
+  user-select:none;
+}
+.big-click:active{transform:translateY(3px) scale(0.995)}
+
+.floating-layer{position:absolute;pointer-events:none;width:100%;height:100%;top:0;left:0}
+
+.shop{padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border-radius:12px;min-height:360px}
+.shop h2{margin:0 0 8px 0}
+.upgrades{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow:auto;padding-right:6px}
+.upgrade{display:flex;justify-content:space-between;align-items:center;padding:8px;background:rgba(255,255,255,0.02);border-radius:8px}
+.u-title{font-weight:600}
+.u-desc{font-size:12px;color:var(--muted);margin-top:4px}
+.u-cost{font-weight:700;color:var(--accent)}
+.u-buy{padding:6px 10px;border-radius:8px;background:#0f7a5f;color:white}
+
+.controls{display:flex;gap:8px;margin-top:12px}
+
+footer{grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;margin-top:8px}
+
+/* floating + scoring animation */
+.floater{
+  position:absolute;left:50%;transform:translateX(-50%) translateY(0);
+  color:var(--accent);font-weight:700;text-shadow:0 3px 10px rgba(0,0,0,0.6);
+  animation:floatUp 900ms ease-out forwards;
+  pointer-events:none;
+}
+@keyframes floatUp{
+  0%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+  100%{opacity:0;transform:translateX(-50%) translateY(-120px) scale(1.1)}
+}
+
+/* responsive */
+@media (max-width:920px){
+  main#app{grid-template-columns:1fr;max-width:640px}
+  .big-click{width:180px;height:180px;font-size:64px}
 }
