@@ -1,16 +1,78 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Offline Test</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Offline Clicker — Installable PWA</title>
+
+  <!-- PWA / iOS meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Offline Clicker">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <!-- simple inline apple icon (SVG data URI) -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,
+    %3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E
+      %3Crect width='100%25' height='100%25' rx='64' fill='%230b1220'/%3E
+      %3Ctext x='50%25' y='54%25' font-size='240' fill='%23ffd85a' font-family='Arial' text-anchor='middle' alignment-baseline='middle'%3E%F0%9F%8E%89%3C/text%3E
+    %3C/svg%3E" />
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Hello! This site works offline 🎉</h1>
-  <p>Try turning off your internet and refreshing.</p>
+  <main id="app">
+    <header>
+      <h1>Offline Clicker</h1>
+      <div class="meta">
+        <button id="installBtn" class="ghost">Install</button>
+        <label class="toggle">
+          <input id="soundToggle" type="checkbox" checked>
+          <span>Sound</span>
+        </label>
+      </div>
+    </header>
 
-  <button id="counterBtn">Clicked 0 times</button>
+    <section class="game">
+      <div id="scorePanel">
+        <div class="score" id="score">0</div>
+        <div class="perSec" id="perSec">0 / sec</div>
+      </div>
 
-  <script src="script.js"></script>
+      <button id="bigClick" class="big-click">✶</button>
+
+      <div class="floating-layer" id="floatingLayer"></div>
+    </section>
+
+    <section class="shop">
+      <h2>Upgrades</h2>
+      <div class="upgrades" id="upgradesList">
+        <!-- upgrades populated by script -->
+      </div>
+      <div class="controls">
+        <button id="prestigeBtn" class="danger">Prestige × Reset</button>
+        <button id="resetBtn" class="ghost">Hard Reset</button>
+      </div>
+    </section>
+
+    <footer>
+      <small>Auto-save every 5s • Works offline • Installable</small>
+    </footer>
+  </main>
+
+  <template id="upgradeTpl">
+    <div class="upgrade">
+      <div class="u-left">
+        <div class="u-title"></div>
+        <div class="u-desc"></div>
+      </div>
+      <div class="u-right">
+        <div class="u-cost"></div>
+        <button class="u-buy">Buy</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="script.js" defer></script>
 </body>
 </html>
